@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación de E-commerce GA4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    </head>
+<body class="bg-gray-100 text-gray-800 font-sans leading-normal tracking-normal">
+
+    <header class="bg-blue-600 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#product-list" class="text-2xl font-bold text-white hover:text-blue-200 transition duration-200 ease-in-out site-logo">Mi Tienda Online</a>
+            <nav>
+                <a href="#product-list" class="text-white hover:underline mr-4 nav-link">Productos</a>
+                 <a href="#search-section" class="text-white hover:underline mr-4 nav-link">Buscar</a>
+                <a href="#wishlist-section" class="text-white hover:underline mr-4 nav-link">Lista de Deseos (<span id="wishlist-count">0</span>)</a>
+                <a href="#cart-section" class="text-white hover:underline nav-link">Carrito (<span id="cart-count">0</span>)</a>
+                 <a href="#lead-section" class="text-white hover:underline mr-4 nav-link">Contacto</a>
+                 <a href="#refund-section" class="text-white hover:underline mr-4 nav-link">Reembolso</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto mt-8 p-4 bg-white rounded-lg shadow-md">
+
+        <section id="search-section" class="mb-8 p-6 border-b border-gray-200 hidden">
+            <h2 class="text-xl font-semibold mb-4">Buscar Productos</h2>
+            <div class="flex">
+                <input type="text" placeholder="Ej. Camiseta, Pantalón..." class="flex-grow p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 search-input">
+                <button class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 transition duration-200 ease-in-out view-search-results-button">Buscar</button>
+            </div>
+            <div id="search-results" class="mt-4 hidden">
+                <h3 class="text-lg font-medium mb-2">Resultados:</h3>
+                <p>Resultado 1</p>
+                <p>Resultado 2</p>
+                </div>
+        </section>
+
+        <section id="product-list" class="mb-8 p-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold mb-4">Nuestros Productos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="product-grid">
+                </div>
+        </section>
+
+        <section id="product-detail" class="mb-8 p-6 border-b border-gray-200 hidden">
+             <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-200 ease-in-out mb-4 back-to-list-button">Volver a la Lista</button>
+            <div id="product-detail-content">
+                </div>
+        </section>
+
+        <section id="wishlist-section" class="mb-8 p-6 border-b border-gray-200 hidden">
+             <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-200 ease-in-out mb-4 back-to-list-button">Volver a Productos</button>
+            <h2 class="text-xl font-semibold mb-4">Tu Lista de Deseos</h2>
+            <div id="wishlist-items" class="mb-4">
+                <p id="empty-wishlist-message" class="text-gray-500">Tu lista de deseos está vacía.</p>
+            </div>
+        </section>
+
+
+        <section id="cart-section" class="mb-8 p-6 border-b border-gray-200 hidden">
+             <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-200 ease-in-out mb-4 back-to-list-button">Volver a Productos</button>
+            <h2 class="text-xl font-semibold mb-4">Tu Carrito de Compras</h2>
+            <div id="cart-items" class="mb-4">
+                <p id="empty-cart-message" class="text-gray-500">Tu carrito está vacío.</p>
+            </div>
+            <div id="cart-summary" class="text-right text-lg font-semibold mb-6 hidden">
+                Total: $<span id="cart-total">0.00</span>
+            </div>
+            <button id="begin-checkout-button" class="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 transition duration-200 ease-in-out begin-checkout-button hidden">Proceder al Pago</button>
+        </section>
+
+        <section id="checkout-section" class="mb-8 p-6 border-b border-gray-200 hidden">
+             <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-200 ease-in-out mb-4 back-to-cart-button">Volver al Carrito</button>
+            <h2 class="text-xl font-semibold mb-4">Proceso de Pago</h2>
+
+            <div id="shipping-step">
+                <h3 class="text-lg font-medium mb-4">1. Información de Envío</h3>
+                <form id="shipping-form">
+                    <div class="mb-4">
+                        <label for="address" class="block text-gray-700">Dirección</label>
+                        <input type="text" id="address" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                     <div class="mb-4">
+                        <label for="city" class="block text-gray-700">Ciudad</label>
+                        <input type="text" id="city" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                     <div class="mb-4">
+                        <label for="zip" class="block text-gray-700">Código Postal</label>
+                        <input type="text" id="zip" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200 ease-in-out add-shipping-info-button">Continuar al Pago</button>
+                </form>
+            </div>
+
+            <div id="payment-step" class="hidden">
+                <h3 class="text-lg font-medium mb-4">2. Información de Pago</h3>
+                 <form id="payment-form">
+                    <div class="mb-4">
+                        <label for="card" class="block text-gray-700">Número de Tarjeta</label>
+                        <input type="text" id="card" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="xxxx-xxxx-xxxx-xxxx" required>
+                    </div>
+                     <div class="mb-4">
+                        <label for="expiry" class="block text-gray-700">Fecha de Vencimiento</label>
+                        <input type="text" id="expiry" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="MM/AA" required>
+                    </div>
+                     <div class="mb-4">
+                        <label for="cvv" class="block text-gray-700">CVV</label>
+                        <input type="text" id="cvv" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="xxx" required>
+                    </div>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200 ease-in-out add-payment-info-button">Revisar Pedido</button>
+                </form>
+            </div>
+
+            <div id="review-step" class="hidden">
+                 <h3 class="text-lg font-medium mb-4">3. Revisar Pedido</h3>
+                 <div id="order-summary" class="mb-4 border-b border-gray-200 pb-4">
+                     </div>
+                 <div class="text-right text-lg font-semibold mb-6">
+                    Total: $<span id="order-total">0.00</span>
+                </div>
+                 <button id="confirm-purchase-button" class="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 transition duration-200 ease-in-out purchase-button">Confirmar Compra</button>
+            </div>
+        </section>
+
+        <section id="purchase-confirmation-section" class="mb-8 p-6 border-b border-gray-200 hidden">
+            <h2 class="text-xl font-semibold mb-4">¡Gracias por tu Compra!</h2>
+            <p>Tu pedido ha sido procesado con éxito.</p>
+            <p>Número de Pedido: <span id="order-number"></span></p>
+            <p>Recibirás un correo de confirmación pronto.</p>
+             <button class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200 ease-in-out mt-4 back-to-list-button">Continuar Comprando</button>
+        </section>
+
+        <section id="lead-section" class="mb-8 p-6 border-b border-gray-200 hidden">
+             <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-200 ease-in-out mb-4 back-to-list-button">Volver a Productos</button>
+            <h2 class="text-xl font-semibold mb-4">Contáctanos</h2>
+            <form id="lead-form">
+                <div class="mb-4">
+                    <label for="contact-name" class="block text-gray-700">Nombre</label>
+                    <input type="text" id="contact-name" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                 <div class="mb-4">
+                    <label for="contact-email" class="block text-gray-700">Email</label>
+                    <input type="email" id="contact-email" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                 <div class="mb-4">
+                    <label for="contact-message" class="block text-gray-700">Mensaje</label>
+                    <textarea id="contact-message" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition duration-200 ease-in-out lead-button">Enviar Mensaje</button>
+            </form>
+        </section>
+
+         <section id="refund-section" class="mb-8 p-6 border-b border-gray-200 hidden">
+             <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-200 ease-in-out mb-4 back-to-list-button">Volver a Productos</button>
+            <h2 class="text-xl font-semibold mb-4">Simular Reembolso</h2>
+            <p>Esta sección simula la acción de un reembolso. En un sitio real, esto usualmente se manejaría desde el backend.</p>
+            <button class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-200 ease-in-out refund-button">Procesar Reembolso</button>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center p-4 mt-8">
+        <p>&copy; 2023 Mi Tienda Online. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // --- Datos de Productos (Simulados) ---
+        const products = [
+            { id: 'prod_1', name: 'Camiseta Cool', price: 25.00, description: 'Una camiseta muy cool para el día a día.', image: 'https://placehold.co/300x200/e0e0e0/333333?text=Producto+1' },
+            { id: 'prod_2', name: 'Pantalón Elegante', price: 50.00, description: 'Pantalón de vestir elegante para ocasiones especiales.', image: 'https://placehold.co/300x200/d0d0d0/333333?text=Producto+2' },
+            { id: 'prod_3', name: 'Zapatos Deportivos', price: 75.00, description: 'Zapatos cómodos para hacer ejercicio o usar casualmente.', image: 'https://placehold.co/300x200/c0c0c0/333333?text=Producto+3' },
+             { id: 'prod_4', name: 'Gorra Estilosa', price: 20.00, description: 'Gorra moderna para complementar tu look.', image: 'https://placehold.co/300x200/a0a0a0/333333?text=Producto+4' },
+            { id: 'prod_5', name: 'Chaqueta Ligera', price: 60.00, description: 'Chaqueta ideal para las tardes frescas.', image: 'https://placehold.co/300x200/909090/333333?text=Producto+5' },
+        ];
+
+        // --- Estado de la Simulación ---
+        let cart = [];
+        let wishlist = [];
+        let currentView = '#product-list'; // Vista actual
+
+        // --- Elementos del DOM ---
+        const productGrid = document.getElementById('product-grid');
+        const productDetailSection = document.getElementById('product-detail');
+        const productDetailContent = document.getElementById('product-detail-content');
+        const cartSection = document.getElementById('cart-section');
+        const cartItemsContainer = document.getElementById('cart-items');
+        const cartTotalSpan = document.getElementById('cart-total');
+        const cartCountSpan = document.getElementById('cart-count');
+        const wishlistSection = document.getElementById('wishlist-section');
+        const wishlistItemsContainer = document.getElementById('wishlist-items');
+        const wishlistCountSpan = document.getElementById('wishlist-count');
+        const checkoutSection = document.getElementById('checkout-section');
+        const shippingStep = document.getElementById('shipping-step');
+        const paymentStep = document.getElementById('payment-step');
+        const reviewStep = document.getElementById('review-step');
+        const purchaseConfirmationSection = document.getElementById('purchase-confirmation-section');
+        const orderNumberSpan = document.getElementById('order-number');
+        const orderSummaryDiv = document.getElementById('order-summary');
+        const orderTotalSpan = document.getElementById('order-total');
+        const emptyCartMessage = document.getElementById('empty-cart-message');
+        const emptyWishlistMessage = document.getElementById('empty-wishlist-message');
+         const beginCheckoutButton = document.getElementById('begin-checkout-button');
+         const cartSummaryDiv = document.getElementById('cart-summary');
+         const searchSection = document.getElementById('search-section');
+         const leadSection = document.getElementById('lead-section');
+         const refundSection = document.getElementById('refund-section');
+
+
+        // --- Funciones de Renderizado ---
+
+        // Renderiza la lista de productos
+        function renderProductList() {
+            productGrid.innerHTML = products.map(product => `
+                <div class="bg-gray-50 p-4 rounded-lg shadow item-list-item" data-item-id="${product.id}" data-item-name="${product.name}" data-item-list-name="Página Principal">
+                    <img src="${product.image}" alt="${product.name}" class="w-full h-40 object-cover rounded-md mb-4">
+                    <h3 class="text-lg font-medium mb-2">${product.name}</h3>
+                    <p class="text-gray-600 mb-4">$${product.price.toFixed(2)}</p>
+                    <div class="flex justify-between items-center">
+                        <button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-200 ease-in-out view-item-button" data-item-id="${product.id}">Ver Detalles</button>
+                        <button class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200 ease-in-out add-to-cart-button" data-item-id="${product.id}">Añadir al Carrito</button>
+                        <button class="text-gray-500 hover:text-red-500 transition duration-200 ease-in-out add-to-wishlist-button" data-item-id="${product.id}">
+                             <i class="far fa-heart"></i> </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Renderiza el detalle de un producto
+        function renderProductDetail(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            productDetailContent.innerHTML = `
+                <div class="flex flex-col md:flex-row gap-6">
+                    <img src="${product.image.replace('300x200', '400x300').replace('Producto+1', 'Detalle+Producto').replace('Producto+2', 'Detalle+Producto').replace('Producto+3', 'Detalle+Producto').replace('Producto+4', 'Detalle+Producto').replace('Producto+5', 'Detalle+Producto')}" alt="${product.name}" class="w-full md:w-1/2 h-64 object-cover rounded-md">
+                    <div class="w-full md:w-1/2">
+                        <h3 class="text-2xl font-bold mb-2">${product.name}</h3>
+                        <p class="text-gray-700 mb-4">${product.description}</p>
+                        <p class="text-xl font-semibold text-green-700 mb-4">$${product.price.toFixed(2)}</p>
+                        <div class="flex items-center gap-4">
+                            <button class="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 transition duration-200 ease-in-out add-to-cart-button" data-item-id="${product.id}">Añadir al Carrito</button>
+                            <button class="bg-purple-500 text-white px-6 py-3 rounded-md hover:bg-purple-600 transition duration-200 ease-in-out share-button">Compartir</button>
+                             <button class="text-gray-500 hover:text-red-500 transition duration-200 ease-in-out add-to-wishlist-button" data-item-id="${product.id}">
+                                <i class="far fa-heart"></i> </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Renderiza los ítems en el carrito
+        function renderCartItems() {
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '';
+                emptyCartMessage.classList.remove('hidden');
+                cartSummaryDiv.classList.add('hidden');
+                beginCheckoutButton.classList.add('hidden');
+            } else {
+                emptyCartMessage.classList.add('hidden');
+                 cartSummaryDiv.classList.remove('hidden');
+                 beginCheckoutButton.classList.remove('hidden');
+
+                cartItemsContainer.innerHTML = cart.map(item => `
+                    <div class="flex justify-between items-center border-b border-gray-200 py-2 cart-item" data-item-id="${item.id}">
+                        <span>${item.name} (x${item.quantity})</span>
+                        <div>
+                            <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                            <button class="ml-4 text-red-600 hover:text-red-800 remove-from-cart-button" data-item-id="${item.id}">Eliminar</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+             updateCartTotal();
+             updateCartCount();
+        }
+
+         // Renderiza los ítems en la lista de deseos
+        function renderWishlistItems() {
+             if (wishlist.length === 0) {
+                wishlistItemsContainer.innerHTML = '';
+                emptyWishlistMessage.classList.remove('hidden');
+            } else {
+                emptyWishlistMessage.classList.add('hidden');
+                wishlistItemsContainer.innerHTML = wishlist.map(item => `
+                    <div class="flex justify-between items-center border-b border-gray-200 py-2 wishlist-item" data-item-id="${item.id}">
+                        <span>${item.name}</span>
+                        <div>
+                             <button class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition duration-200 ease-in-out move-to-cart-button" data-item-id="${item.id}">Mover al Carrito</button>
+                             <button class="ml-4 text-red-600 hover:text-red-800 remove-from-wishlist-button" data-item-id="${item.id}">Eliminar</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            updateWishlistCount();
+        }
+
+        // Renderiza el resumen del pedido en el checkout
+        function renderOrderSummary() {
+            orderSummaryDiv.innerHTML = cart.map(item => `
+                <div class="flex justify-between items-center py-1">
+                    <span>${item.name} (x${item.quantity})</span>
+                    <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+            `).join('');
+             orderTotalSpan.textContent = calculateCartTotal().toFixed(2);
+        }
+
+
+        // --- Funciones de Lógica de Carrito y Wishlist ---
+
+        // Calcula el total del carrito
+        function calculateCartTotal() {
+            return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        }
+
+        // Actualiza el contador del carrito en el header
+        function updateCartCount() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCountSpan.textContent = totalItems;
+        }
+
+         // Actualiza el total del carrito en la vista del carrito
+        function updateCartTotal() {
+             cartTotalSpan.textContent = calculateCartTotal().toFixed(2);
+        }
+
+         // Actualiza el contador de la lista de deseos en el header
+        function updateWishlistCount() {
+             wishlistCountSpan.textContent = wishlist.length;
+        }
+
+
+        // Añade un producto al carrito (add_to_cart)
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingItemIndex = cart.findIndex(item => item.id === productId);
+
+            if (existingItemIndex > -1) {
+                cart[existingItemIndex].quantity++;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            renderCartItems(); // Volver a renderizar el carrito para mostrar cambios
+             alert(`${product.name} ha sido añadido al carrito.`); // Simulación de notificación
+             // Aquí DISPARAR EL EVENTO add_to_cart
+             console.log('Evento GA4: add_to_cart', { items: [product] }); // Log para simular
+        }
+
+        // Elimina un producto del carrito (remove_from_cart)
+        function removeFromCart(productId) {
+            const itemIndex = cart.findIndex(item => item.id === productId);
+            if (itemIndex > -1) {
+                 const removedItem = cart[itemIndex];
+                cart.splice(itemIndex, 1);
+                renderCartItems(); // Volver a renderizar el carrito
+                 alert(`${removedItem.name} ha sido eliminado del carrito.`); // Simulación de notificación
+                 // Aquí DISPARAR EL EVENTO remove_from_cart
+                 console.log('Evento GA4: remove_from_cart', { items: [removedItem] }); // Log para simular
+            }
+        }
+
+         // Añade un producto a la lista de deseos (add_to_wishlist - evento personalizado)
+        function addToWishlist(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingItemIndex = wishlist.findIndex(item => item.id === productId);
+
+            if (existingItemIndex === -1) {
+                wishlist.push(product);
+                 renderWishlistItems(); // Volver a renderizar la lista de deseos
+                 alert(`${product.name} ha sido añadido a la lista de deseos.`); // Simulación de notificación
+                 // Aquí podrías DISPARAR UN EVENTO PERSONALIZADO (ej. add_to_wishlist)
+                 console.log('Evento GA4: add_to_wishlist', { items: [product] }); // Log para simular
+            } else {
+                 alert(`${product.name} ya está en tu lista de deseos.`);
+            }
+        }
+
+         // Elimina un producto de la lista de deseos (remove_from_wishlist - evento personalizado)
+        function removeFromWishlist(productId) {
+            const itemIndex = wishlist.findIndex(item => item.id === productId);
+            if (itemIndex > -1) {
+                 const removedItem = wishlist[itemIndex];
+                wishlist.splice(itemIndex, 1);
+                renderWishlistItems(); // Volver a renderizar la lista de deseos
+                 alert(`${removedItem.name} ha sido eliminado de la lista de deseos.`); // Simulación de notificación
+                 // Aquí podrías DISPARAR UN EVENTO PERSONALIZADO (ej. remove_from_wishlist)
+                 console.log('Evento GA4: remove_from_wishlist', { items: [removedItem] }); // Log para simular
+            }
+        }
+
+         // Mueve un producto de la lista de deseos al carrito (move_to_cart_from_wishlist - evento personalizado)
+        function moveItemToCartFromWishlist(productId) {
+             const itemIndex = wishlist.findIndex(item => item.id === productId);
+            if (itemIndex > -1) {
+                 const itemToMove = wishlist[itemIndex];
+                 removeFromWishlist(productId); // Eliminar de la wishlist
+                 addToCart(productId); // Añadir al carrito
+                 alert(`${itemToMove.name} ha sido movido al carrito.`); // Simulación de notificación
+                 // Aquí podrías DISPARAR UN EVENTO PERSONALIZADO (ej. move_to_cart_from_wishlist)
+                 console.log('Evento GA4: move_to_cart_from_wishlist', { items: [itemToMove] }); // Log para simular
+            }
+         }
+
+
+        // --- Funciones de Navegación y Vistas ---
+
+        // Oculta todas las secciones principales
+        function hideAllSections() {
+            document.querySelectorAll('main section').forEach(section => {
+                section.classList.add('hidden');
+            });
+        }
+
+        // Muestra una sección específica
+        function showSection(id) {
+            hideAllSections();
+            const section = document.getElementById(id);
+            if (section) {
+                section.classList.remove('hidden');
+                currentView = id;
+                // Aquí podrías DISPARAR EVENTOS view_... basados en el ID de la sección
+                if (id === 'product-list') {
+                     console.log('Evento GA4: view_item_list'); // Log para simular
+                } else if (id === 'cart-section') {
+                     console.log('Evento GA4: view_cart'); // Log para simular
+                     renderCartItems(); // Asegurar que el carrito se renderiza al verlo
+                } else if (id === 'wishlist-section') {
+                     console.log('Evento GA4: view_wishlist'); // Log para simular (personalizado)
+                     renderWishlistItems(); // Asegurar que la wishlist se renderiza al verlo
+                } else if (id === 'search-section') {
+                     console.log('Evento GA4: view_search_results'); // Log para simular (podrías dispararlo al mostrar resultados, no solo la barra)
+                } else if (id === 'lead-section') {
+                     console.log('Evento GA4: view_lead_form'); // Log para simular (personalizado)
+                } else if (id === 'refund-section') {
+                     console.log('Evento GA4: view_refund_section'); // Log para simular (personalizado)
+                }
+                // El evento purchase se dispara ANTES de llegar a 'purchase-confirmation-section', al confirmar la compra
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Navegación por enlaces del header y logo
+        document.querySelectorAll('.nav-link, .site-logo').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                showSection(targetId);
+                 // Resetear pasos del checkout si se sale de él
+                 if (targetId !== 'checkout-section') {
+                     shippingStep.classList.remove('hidden');
+                     paymentStep.classList.add('hidden');
+                     reviewStep.classList.add('hidden');
+                 }
+            });
+        });
+
+        // Navegación por botones "Volver"
+         document.querySelectorAll('.back-to-list-button').forEach(button => {
+            button.addEventListener('click', function() {
+                showSection('product-list');
+            });
+        });
+
+         document.querySelector('.back-to-cart-button').addEventListener('click', function() {
+             showSection('cart-section');
+         });
+
+
+        // Delegación de eventos para botones dentro de la lista de productos
+        productGrid.addEventListener('click', function(e) {
+            const target = e.target;
+            const productId = target.dataset.itemId;
+
+            if (target.classList.contains('view-item-button')) {
+                // Simula select_item al hacer clic para ver detalles
+                const product = products.find(p => p.id === productId);
+                console.log('Evento GA4: select_item', { items: [product] }); // Log para simular select_item
+
+                showSection('product-detail');
+                renderProductDetail(productId);
+                 // Luego, simula view_item al mostrar el detalle
+                 console.log('Evento GA4: view_item', { items: [product] }); // Log para simular view_item
+
+            } else if (target.classList.contains('add-to-cart-button')) {
+                addToCart(productId);
+            } else if (target.classList.contains('add-to-wishlist-button')) {
+                 addToWishlist(productId);
+            }
+        });
+
+         // Delegación de eventos para botones dentro del detalle de producto
+         productDetailSection.addEventListener('click', function(e) {
+             const target = e.target;
+             const productId = target.dataset.itemId;
+
+             if (target.classList.contains('add-to-cart-button')) {
+                addToCart(productId);
+             } else if (target.classList.contains('share-button')) {
+                 // Aquí DISPARAR EL EVENTO share
+                 console.log('Evento GA4: share'); // Log para simular
+                 alert('Simulando compartir...');
+             } else if (target.classList.contains('add-to-wishlist-button')) {
+                 addToWishlist(productId);
+             }
+         });
+
+        // Delegación de eventos para botones dentro del carrito
+        cartItemsContainer.addEventListener('click', function(e) {
+            const target = e.target;
+            if (target.classList.contains('remove-from-cart-button')) {
+                const productId = target.dataset.itemId;
+                removeFromCart(productId);
+            }
+        });
+
+         // Delegación de eventos para botones dentro de la lista de deseos
+        wishlistItemsContainer.addEventListener('click', function(e) {
+            const target = e.target;
+            const productId = target.dataset.itemId;
+
+            if (target.classList.contains('remove-from-wishlist-button')) {
+                removeFromWishlist(productId);
+            } else if (target.classList.contains('move-to-cart-button')) {
+                 moveItemToCartFromWishlist(productId);
+            }
+        });
+
+        // Botón de búsqueda (view_search_results)
+        document.querySelector('.view-search-results-button').addEventListener('click', function() {
+             document.getElementById('search-results').classList.remove('hidden');
+             // Aquí DISPARAR EL EVENTO view_search_results
+             console.log('Evento GA4: view_search_results', { search_term: document.querySelector('.search-input').value }); // Log para simular
+        });
+
+
+        // Botón "Proceder al Pago" (begin_checkout)
+        beginCheckoutButton.addEventListener('click', function() {
+            showSection('checkout-section');
+             // Aquí DISPARAR EL EVENTO begin_checkout
+             console.log('Evento GA4: begin_checkout', { items: cart }); // Log para simular
+        });
+
+        // Formulario de Envío (Paso 1 Checkout) (add_shipping_info)
+        document.getElementById('shipping-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Aquí DISPARAR EL EVENTO add_shipping_info
+            // Puedes capturar los datos del formulario aquí:
+            // const address = document.getElementById('address').value;
+            // const city = document.getElementById('city').value;
+            // const zip = document.getElementById('zip').value;
+            console.log('Evento GA4: add_shipping_info', { shipping_tier: 'Standard' /*, address: address, city: city, zip: zip */ }); // Log para simular (simulando un tier)
+            shippingStep.classList.add('hidden');
+            paymentStep.classList.remove('hidden');
+        });
+
+         // Formulario de Pago (Paso 2 Checkout) (add_payment_info)
+        document.getElementById('payment-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Aquí DISPARAR EL EVENTO add_payment_info
+            // Puedes capturar los datos del formulario aquí:
+            // const paymentMethod = 'Credit Card'; // O capturar del formulario
+            console.log('Evento GA4: add_payment_info', { payment_type: 'Credit Card' /*, payment_method: paymentMethod */ }); // Log para simular (simulando tipo)
+            paymentStep.classList.add('hidden');
+            reviewStep.classList.remove('hidden');
+            renderOrderSummary(); // Renderizar resumen antes de confirmar
+        });
+
+        // Botón "Confirmar Compra" (Paso 3 Checkout) (purchase)
+        document.getElementById('confirm-purchase-button').addEventListener('click', function() {
+            // Simular datos de la compra
+            const transactionId = 'TRN' + Date.now();
+            const value = calculateCartTotal();
+            const currency = 'USD'; // O la moneda que uses
+
+            // Aquí DISPARAR EL EVENTO purchase
+            console.log('Evento GA4: purchase', {
+                transaction_id: transactionId,
+                value: value,
+                currency: currency,
+                items: cart
+            }); // Log para simular
+
+            // Limpiar carrito después de la compra simulada
+            cart = [];
+            updateCartCount();
+            renderCartItems(); // Actualizar vista del carrito (ahora vacío)
+
+            // Mostrar confirmación
+            orderNumberSpan.textContent = transactionId;
+            showSection('purchase-confirmation-section');
+        });
+
+        // Formulario de Lead (Contacto) (lead)
+        document.getElementById('lead-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Aquí DISPARAR EL EVENTO lead
+             const name = document.getElementById('contact-name').value;
+             const email = document.getElementById('contact-email').value;
+             const message = document.getElementById('contact-message').value;
+            console.log('Evento GA4: lead', { form_name: 'contact_form', name: name, email: email, message: message }); // Log para simular
+            alert('Mensaje enviado (simulado).');
+             // Limpiar formulario
+             document.getElementById('lead-form').reset();
+        });
+
+        // Botón Simular Reembolso (refund)
+        document.querySelector('.refund-button').addEventListener('click', function() {
+             // Aquí DISPARAR EL EVENTO refund
+             // En un caso real, necesitarías datos de la transacción a reembolsar
+            console.log('Evento GA4: refund', { transaction_id: 'REFUND_SIMULADO_' + Date.now(), value: 50.00, currency: 'USD' }); // Log para simular
+            alert('Reembolso simulado procesado.');
+        });
+
+
+        // --- Inicialización ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProductList(); // Cargar productos al inicio
+            updateCartCount(); // Asegurar que el contador del carrito inicia en 0
+            updateWishlistCount(); // Asegurar que el contador de wishlist inicia en 0
+             showSection('product-list'); // Mostrar la lista de productos por defecto
+             // Aquí DISPARAR EL EVENTO page_view (si no lo haces con gtag/GTM base)
+             console.log('Evento GA4: page_view'); // Log para simular
+        });
+
+
+    </script>
+
+</body>
+</html>
