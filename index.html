@@ -423,6 +423,7 @@
             showCustomAlert(`${product.name} ha sido añadido al carrito.`); // Simulación de notificación
 
             // Implementación del dataLayer.push para add_to_cart
+            // Este evento envía la información del producto que *acaba de ser añadido* en esta interacción.
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push({
                 'event': 'add_to_cart', // Nombre estándar de GA4
@@ -533,6 +534,24 @@
                      currentSiteSection = 'Tienda';
                      console.log('Evento GA4: view_cart'); // Log para simular
                      renderCartItems(); // Asegurar que el carrito se renderiza al verlo
+                     // dataLayer.push para view_cart
+                     window.dataLayer = window.dataLayer || [];
+                     window.dataLayer.push({
+                         'event': 'view_cart',
+                         'ecommerce': {
+                             'currency': 'USD',
+                             'value': calculateCartTotal(),
+                             'items': cart.map(item => ({
+                                 'item_id': item.id,
+                                 'item_name': item.name,
+                                 'item_category': item.item_category || 'N/A',
+                                 'item_brand': item.item_brand || 'N/A',
+                                 'item_variant': item.item_variant || 'N/A',
+                                 'price': item.price,
+                                 'quantity': item.quantity
+                             }))
+                         }
+                     });
                 } else if (id === 'wishlist-section') {
                      currentPageCategory = 'Lista de Deseos';
                      currentSiteSection = 'Tienda';
