@@ -217,18 +217,26 @@
 
     <script>
         // --- Datos de Productos (Simulados) ---
+        // Se han añadido campos como item_category y item_brand para demostración.
         const products = [
-            { id: 'prod_1', name: 'Camiseta Cool', price: 25.00, description: 'Una camiseta muy cool para el día a día.', image: 'https://placehold.co/300x200/e0e0e0/333333?text=Producto+1' },
-            { id: 'prod_2', name: 'Pantalón Elegante', price: 50.00, description: 'Pantalón de vestir elegante para ocasiones especiales.', image: 'https://placehold.co/300x200/d0d0d0/333333?text=Producto+2' },
-            { id: 'prod_3', name: 'Zapatos Deportivos', price: 75.00, description: 'Zapatos cómodos para hacer ejercicio o usar casualmente.', image: 'https://placehold.co/300x200/c0c0c0/333333?text=Producto+3' },
-             { id: 'prod_4', name: 'Gorra Estilosa', price: 20.00, description: 'Gorra moderna para complementar tu look.', image: 'https://placehold.co/300x200/a0a0a0/333333?text=Producto+4' },
-            { id: 'prod_5', name: 'Chaqueta Ligera', price: 60.00, description: 'Chaqueta ideal para las tardes frescas.', image: 'https://placehold.co/300x200/909090/333333?text=Producto+5' },
+            { id: 'prod_1', name: 'Camiseta Cool', price: 25.00, description: 'Una camiseta muy cool para el día a día.', image: 'https://placehold.co/300x200/e0e0e0/333333?text=Producto+1', item_category: 'Ropa', item_brand: 'Marca A', item_variant: 'Azul S' },
+            { id: 'prod_2', name: 'Pantalón Elegante', price: 50.00, description: 'Pantalón de vestir elegante para ocasiones especiales.', image: 'https://placehold.co/300x200/d0d0d0/333333?text=Producto+2', item_category: 'Ropa', item_brand: 'Marca B', item_variant: 'Negro M' },
+            { id: 'prod_3', name: 'Zapatos Deportivos', price: 75.00, description: 'Zapatos cómodos para hacer ejercicio o usar casualmente.', image: 'https://placehold.co/300x200/c0c0c0/333333?text=Producto+3', item_category: 'Calzado', item_brand: 'Marca C', item_variant: 'Talla 42' },
+            { id: 'prod_4', name: 'Gorra Estilosa', price: 20.00, description: 'Gorra moderna para complementar tu look.', image: 'https://placehold.co/300x200/a0a0a0/333333?text=Producto+4', item_category: 'Accesorios', item_brand: 'Marca A', item_variant: 'Unitalla' },
+            { id: 'prod_5', name: 'Chaqueta Ligera', price: 60.00, description: 'Chaqueta ideal para las tardes frescas.', image: 'https://placehold.co/300x200/909090/333333?text=Producto+5', item_category: 'Ropa', item_brand: 'Marca D', item_variant: 'Verde L' },
         ];
 
         // --- Estado de la Simulación ---
         let cart = [];
         let wishlist = [];
         let currentView = '#product-list'; // Vista actual
+
+        // Variables globales para simular user_id, logged_in, page_category, site_section
+        // En una aplicación real, estos valores se obtendrían de la sesión del usuario o de la lógica de la página.
+        let currentUserId = 'user_' + Math.random().toString(36).substring(2, 15); // Simulación de un ID de usuario
+        let isLoggedIn = false; // Simulación de estado de sesión
+        let currentPageCategory = 'Home'; // Categoría de la página actual
+        let currentSiteSection = 'Tienda'; // Sección principal del sitio
 
         // --- Elementos del DOM ---
         const productGrid = document.getElementById('product-grid');
@@ -425,17 +433,13 @@
                         {
                             'item_id': product.id, // ID del producto
                             'item_name': product.name, // Nombre del producto
+                            'item_category': product.item_category || 'N/A', // Categoría principal (usando el nuevo campo)
+                            'item_brand': product.item_brand || 'N/A', // Marca (usando el nuevo campo)
+                            'item_variant': product.item_variant || 'N/A', // Variante (usando el nuevo campo)
                             'price': product.price, // Precio del producto
                             'quantity': quantityAddedThisClick, // Cantidad añadida en esta interacción
-                            // Las siguientes dimensiones no están presentes en tus datos 'products' actuales.
-                            // Si las tuvieras, las añadirías aquí:
-                            // 'item_category': product.category,
-                            // 'item_category2': product.category2,
-                            // 'item_category3': product.category3,
-                            // 'item_brand': product.brand,
-                            // 'item_variant': product.variant,
-                            // 'coupon': product.coupon,
-                            // 'affiliation': product.affiliation
+                            // 'coupon': 'FREESHIP', // Ejemplo de cupón, si lo tuvieras dinámicamente
+                            // 'affiliation': 'Mi Tienda Online' // Ejemplo de afiliación
                         }
                     ]
                 }
@@ -518,22 +522,48 @@
             if (section) {
                 section.classList.remove('hidden');
                 currentView = id;
-                // Aquí podrías DISPARAR EVENTOS view_... basados en el ID de la sección
+
+                // Actualiza page_category y site_section basado en la vista actual
                 if (id === 'product-list') {
+                     currentPageCategory = 'Lista de Productos';
+                     currentSiteSection = 'Tienda';
                      console.log('Evento GA4: view_item_list'); // Log para simular
                 } else if (id === 'cart-section') {
+                     currentPageCategory = 'Carrito de Compras';
+                     currentSiteSection = 'Tienda';
                      console.log('Evento GA4: view_cart'); // Log para simular
                      renderCartItems(); // Asegurar que el carrito se renderiza al verlo
                 } else if (id === 'wishlist-section') {
+                     currentPageCategory = 'Lista de Deseos';
+                     currentSiteSection = 'Tienda';
                      console.log('Evento GA4: view_wishlist'); // Log para simular (personalizado)
                      renderWishlistItems(); // Asegurar que la wishlist se renderiza al verlo
                 } else if (id === 'search-section') {
+                     currentPageCategory = 'Búsqueda';
+                     currentSiteSection = 'Tienda';
                      console.log('Evento GA4: view_search_results'); // Log para simular (podrías dispararlo al mostrar resultados, no solo la barra)
                 } else if (id === 'lead-section') {
+                     currentPageCategory = 'Contacto';
+                     currentSiteSection = 'Soporte';
                      console.log('Evento GA4: view_lead_form'); // Log para simular (personalizado)
                 } else if (id === 'refund-section') {
+                     currentPageCategory = 'Reembolso';
+                     currentSiteSection = 'Soporte';
                      console.log('Evento GA4: view_refund_section'); // Log para simular (personalizado)
+                } else if (id === 'product-detail') {
+                    // La categoría de la página de detalle de producto podría ser dinámica
+                    // Basada en la categoría del producto que se está viendo.
+                    // Para esta simulación, la dejamos como 'Detalle de Producto'.
+                    currentPageCategory = 'Detalle de Producto';
+                    currentSiteSection = 'Tienda';
+                } else if (id === 'checkout-section') {
+                    currentPageCategory = 'Proceso de Pago';
+                    currentSiteSection = 'Checkout';
+                } else if (id === 'purchase-confirmation-section') {
+                    currentPageCategory = 'Confirmación de Compra';
+                    currentSiteSection = 'Checkout';
                 }
+
                 // El evento purchase se dispara ANTES de llegar a 'purchase-confirmation-section', al confirmar la compra
             }
         }
@@ -591,6 +621,25 @@
                 renderProductDetail(productId);
                  // Luego, simula view_item al mostrar el detalle
                  console.log('Evento GA4: view_item', { items: [product] }); // Log para simular view_item
+                 // dataLayer.push para view_item (ejemplo)
+                 window.dataLayer = window.dataLayer || [];
+                 window.dataLayer.push({
+                     'event': 'view_item',
+                     'ecommerce': {
+                         'currency': 'USD',
+                         'value': product.price,
+                         'items': [{
+                             'item_id': product.id,
+                             'item_name': product.name,
+                             'item_category': product.item_category || 'N/A',
+                             'item_brand': product.item_brand || 'N/A',
+                             'item_variant': product.item_variant || 'N/A',
+                             'price': product.price,
+                             'quantity': 1
+                         }]
+                     }
+                 });
+
 
             } else if (target.classList.contains('add-to-cart-button')) {
                 addToCart(productId);
@@ -641,6 +690,15 @@
              document.getElementById('search-results').classList.remove('hidden');
              // Aquí DISPARAR EL EVENTO view_search_results
              console.log('Evento GA4: view_search_results', { search_term: document.querySelector('.search-input').value }); // Log para simular
+             // dataLayer.push para view_search_results (ejemplo)
+             window.dataLayer = window.dataLayer || [];
+             window.dataLayer.push({
+                 'event': 'view_search_results',
+                 'ecommerce': null, // No aplica ecommerce para este evento
+                 'search_term': document.querySelector('.search-input').value,
+                 'page_category': currentPageCategory, // Usando la variable global
+                 'site_section': currentSiteSection // Usando la variable global
+             });
         });
 
 
@@ -649,6 +707,24 @@
             showSection('checkout-section');
              // Aquí DISPARAR EL EVENTO begin_checkout
              console.log('Evento GA4: begin_checkout', { items: cart }); // Log para simular
+             // dataLayer.push para begin_checkout (ejemplo)
+             window.dataLayer = window.dataLayer || [];
+             window.dataLayer.push({
+                 'event': 'begin_checkout',
+                 'ecommerce': {
+                     'currency': 'USD',
+                     'value': calculateCartTotal(),
+                     'items': cart.map(item => ({ // Mapea los ítems del carrito
+                         'item_id': item.id,
+                         'item_name': item.name,
+                         'item_category': item.item_category || 'N/A',
+                         'item_brand': item.item_brand || 'N/A',
+                         'item_variant': item.item_variant || 'N/A',
+                         'price': item.price,
+                         'quantity': item.quantity
+                     }))
+                 }
+             });
         });
 
         // Formulario de Envío (Paso 1 Checkout) (add_shipping_info)
@@ -662,6 +738,25 @@
             console.log('Evento GA4: add_shipping_info', { shipping_tier: 'Standard' /*, address: address, city: city, zip: zip */ }); // Log para simular (simulando un tier)
             shippingStep.classList.add('hidden');
             paymentStep.classList.remove('hidden');
+            // dataLayer.push para add_shipping_info (ejemplo)
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                'event': 'add_shipping_info',
+                'ecommerce': {
+                    'currency': 'USD',
+                    'value': calculateCartTotal(),
+                    'shipping_tier': 'Standard', // Ejemplo de nivel de envío
+                    'items': cart.map(item => ({
+                        'item_id': item.id,
+                        'item_name': item.name,
+                        'item_category': item.item_category || 'N/A',
+                        'item_brand': item.item_brand || 'N/A',
+                        'item_variant': item.item_variant || 'N/A',
+                        'price': item.price,
+                        'quantity': item.quantity
+                    }))
+                }
+            });
         });
 
          // Formulario de Pago (Paso 2 Checkout) (add_payment_info)
@@ -674,6 +769,25 @@
             paymentStep.classList.add('hidden');
             reviewStep.classList.remove('hidden');
             renderOrderSummary(); // Renderizar resumen antes de confirmar
+            // dataLayer.push para add_payment_info (ejemplo)
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                'event': 'add_payment_info',
+                'ecommerce': {
+                    'currency': 'USD',
+                    'value': calculateCartTotal(),
+                    'payment_type': 'Credit Card', // Ejemplo de tipo de pago
+                    'items': cart.map(item => ({
+                        'item_id': item.id,
+                        'item_name': item.name,
+                        'item_category': item.item_category || 'N/A',
+                        'item_brand': item.item_brand || 'N/A',
+                        'item_variant': item.item_variant || 'N/A',
+                        'price': item.price,
+                        'quantity': item.quantity
+                    }))
+                }
+            });
         });
 
         // Botón "Confirmar Compra" (Paso 3 Checkout) (purchase)
@@ -690,6 +804,29 @@
                 currency: currency,
                 items: cart
             }); // Log para simular
+
+            // dataLayer.push para purchase (ejemplo)
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                'event': 'purchase',
+                'ecommerce': {
+                    'transaction_id': transactionId,
+                    'value': value,
+                    'currency': currency,
+                    'tax': (value * 0.10).toFixed(2), // Ejemplo de impuesto
+                    'shipping': 5.00, // Ejemplo de costo de envío
+                    'items': cart.map(item => ({
+                        'item_id': item.id,
+                        'item_name': item.name,
+                        'item_category': item.item_category || 'N/A',
+                        'item_brand': item.item_brand || 'N/A',
+                        'item_variant': item.item_variant || 'N/A',
+                        'price': item.price,
+                        'quantity': item.quantity
+                    }))
+                }
+            });
+
 
             // Limpiar carrito después de la compra simulada
             cart = [];
@@ -710,6 +847,17 @@
              const message = document.getElementById('contact-message').value;
             console.log('Evento GA4: lead', { form_name: 'contact_form', name: name, email: email, message: message }); // Log para simular
             showCustomAlert('Mensaje enviado (simulado).');
+            // dataLayer.push para lead (ejemplo)
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                'event': 'lead',
+                'form_name': 'contact_form',
+                'name': name,
+                'email': email,
+                'message': message,
+                'page_category': currentPageCategory, // Usando la variable global
+                'site_section': currentSiteSection // Usando la variable global
+            });
              // Limpiar formulario
              document.getElementById('lead-form').reset();
         });
@@ -720,6 +868,17 @@
              // En un caso real, necesitarías datos de la transacción a reembolsar
             console.log('Evento GA4: refund', { transaction_id: 'REFUND_SIMULADO_' + Date.now(), value: 50.00, currency: 'USD' }); // Log para simular
             showCustomAlert('Reembolso simulado procesado.');
+            // dataLayer.push para refund (ejemplo)
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                'event': 'refund',
+                'ecommerce': {
+                    'transaction_id': 'REFUND_SIMULADO_' + Date.now(), // ID de transacción simulado
+                    'value': 50.00, // Valor del reembolso simulado
+                    'currency': 'USD'
+                    // 'items': [...] // Si se reembolsan ítems específicos, irían aquí
+                }
+            });
         });
 
 
@@ -731,6 +890,16 @@
              showSection('product-list'); // Mostrar la lista de productos por defecto
              // Aquí DISPARAR EL EVENTO page_view (si no lo haces con gtag/GTM base)
              console.log('Evento GA4: page_view'); // Log para simular
+
+             // dataLayer.push inicial para page_view con variables globales
+             window.dataLayer = window.dataLayer || [];
+             window.dataLayer.push({
+                 'event': 'page_view',
+                 'user_id': currentUserId, // Usando la variable global
+                 'logged_in': isLoggedIn, // Usando la variable global
+                 'page_category': currentPageCategory, // Usando la variable global
+                 'site_section': currentSiteSection // Usando la variable global
+             });
         });
 
 
